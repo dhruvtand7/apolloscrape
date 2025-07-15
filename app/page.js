@@ -445,7 +445,7 @@ const ApolloContactScraper = () => {
       for (let i = 0; i < 10; i++) {
         await new Promise(r => setTimeout(r, 1000));
 
-        const check = await fetch(`/api/apollo-webhook?personId=${contact.id}`);
+        const check = await fetch(`/api/apollowebhook?personId=${contact.id}`);
         if (check.ok) {
           const data = await check.json();
           phoneNumber = data.phone;
