@@ -59,7 +59,7 @@ export async function GET(req) {
       q_organization_domains_list: [domain.replace(/^www\./, '')],
       include_similar_titles: true,
       person_seniorities: [
-        "owner", "founder", "c_suite", "partner", "vp", "head", "director", "manager"
+        "owner", "founder", "c_suite", "partner", "vp", "head", "director"
       ],
       contact_email_status: ["verified", "likely to engage"],
       page: 1,
