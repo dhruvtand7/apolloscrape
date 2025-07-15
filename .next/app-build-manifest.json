@@ -1,3 +1,9 @@
 {
-  "pages": {}
+  "pages": {
+    "/api/apollo/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/apollo/route.js"
+    ]
+  }
 }

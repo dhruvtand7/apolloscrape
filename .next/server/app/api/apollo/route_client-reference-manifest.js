@@ -1,0 +1,1 @@
+globalThis.__RSC_MANIFEST=(globalThis.__RSC_MANIFEST||{});globalThis.__RSC_MANIFEST["/api/apollo/route"]={"moduleLoading":{"prefix":"/_next/"},"ssrModuleMapping":{},"edgeSSRModuleMapping":{},"clientModules":{},"entryCSSFiles":{"C:\\apolloscraper\\apolloscrape\\":[],"C:\\apolloscraper\\apolloscrape\\app\\api\\apollo\\route":[]},"rscModuleMapping":{},"edgeRscModuleMapping":{}}

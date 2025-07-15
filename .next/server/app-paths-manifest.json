@@ -1,1 +1,3 @@
-{}
+{
+  "/api/apollo/route": "app/api/apollo/route.js"
+}
