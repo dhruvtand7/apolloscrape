@@ -77,7 +77,7 @@ export async function GET(req) {
       id: personId,
       reveal_personal_emails: true,
       reveal_phone_number: true,
-      webhook_url: "https://apolloscrape.vercel.app/" // 🔁 replace with your real public URL
+      webhook_url: "https://apolloscrape.vercel.app/api/apollo-webhook" // 🔁 replace with your real public URL
     });
   }
 
