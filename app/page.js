@@ -426,41 +426,57 @@ const ApolloContactScraper = () => {
   };
 
   const selectContact = async (contact) => {
-    addLog(`🔍 Fetching phone for ${contact.name}...`, 'info');
+    addLog(`🔍 Requesting phone for ${contact.name}...`, 'info');
     setIsLoading(true);
-    let phoneNumber = null;
+
     try {
       const url = `/api/apollo?personId=${contact.id}`;
       const response = await fetch(url);
-      if (response.ok) {
-        const data = await response.json();
-        phoneNumber = (data.person?.phone_numbers?.[0]?.sanitized_number) || data.person?.phone || null;
-        if (!phoneNumber) {
-          addLog(`📞 No phone found for ${contact.name}, please choose another.`, 'warning');
-          setIsLoading(false);
-          return;
-        }
-        addLog(`📞 Phone found: ${phoneNumber}`, 'success');
-      } else {
+      
+      if (!response.ok) {
         const errorText = await response.text();
-        addLog(`❌ Phone API Error: ${response.status} - ${errorText}`, 'error');
+        throw new Error(`API Error: ${response.status} - ${errorText}`);
       }
+
+      addLog(`📬 Phone request submitted. Waiting for webhook...`, 'info');
+
+      // Poll webhook result for 10 seconds max
+      let phoneNumber = null;
+      for (let i = 0; i < 10; i++) {
+        await new Promise(r => setTimeout(r, 1000));
+
+        const check = await fetch(`/api/apollo-webhook?personId=${contact.id}`);
+        if (check.ok) {
+          const data = await check.json();
+          phoneNumber = data.phone;
+          break;
+        }
+      }
+
+      if (!phoneNumber) {
+        addLog(`📞 Phone not available yet for ${contact.name}`, 'warning');
+      } else {
+        addLog(`📞 Phone found: ${phoneNumber}`, 'success');
+      }
+
+      const finalContact = {
+        'Company Name': contact.companyName,
+        'Employee Name': contact.name,
+        'Email': contact.email || 'N/A',
+        'Phone No': phoneNumber || 'N/A',
+        'Designation': contact.title,
+        'LinkedIn': contact.linkedin || 'N/A'
+      };
+
+      setSelectedContacts(prev => [...prev, finalContact]);
+      addLog(`👍 Added ${contact.name} to selected list.`, 'success');
+      processNextCompany(currentCompanyIndex + 1);
+
     } catch (error) {
-      addLog(`❌ Error fetching phone: ${error.message}`, 'error');
+      addLog(`❌ Error: ${error.message}`, 'error');
+    } finally {
+      setIsLoading(false);
     }
-
-    const finalContact = {
-      'Company Name': contact.companyName,
-      'Employee Name': contact.name,
-      'Email': contact.email || 'N/A',
-      'Phone No': phoneNumber || 'N/A',
-      'Designation': contact.title,
-      'LinkedIn': contact.linkedin || 'N/A'
-    };
-
-    setSelectedContacts(prev => [...prev, finalContact]);
-    addLog(`👍 Added ${contact.name} to selected list.`, 'success');
-    processNextCompany(currentCompanyIndex + 1);
   };
 
   const removeSelectedContact = (index) => {
