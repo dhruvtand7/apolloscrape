@@ -1,1 +1,4 @@
-{}
+{
+  "/api/apollo/route": "app/api/apollo/route.js",
+  "/page": "app/page.js"
+}

@@ -3,13 +3,10 @@ import { NextResponse } from 'next/server';
 
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
-  const q = searchParams.get('q'); // Company search
-  const orgId = searchParams.get('orgId'); // Contact search
-  const personId = searchParams.get('personId'); // Enrich person
-  const domain = searchParams.get('domain'); // Optional domain fallback
+  const q = searchParams.get('q'); // Company search query
 
-  if (!q && !orgId && !personId) {
-    return NextResponse.json({ error: 'A search parameter is required' }, { status: 400 });
+  if (!q) {
+    return NextResponse.json({ error: 'Company search parameter (q) is required' }, { status: 400 });
   }
 
   const API_KEY = process.env.APOLLO_API_KEY;
@@ -27,6 +24,7 @@ export async function GET(req) {
     'Accept': 'application/json'
   };
 
+<<<<<<< Updated upstream
   let url = '';
   let method = 'POST';
   let body = null;
@@ -80,16 +78,28 @@ export async function GET(req) {
       webhook_url: "https://apolloscrape.vercel.app/api/apollowebhook"
       // webhook_url: "https://yourdomain.com/api/apollo-webhook" // 🔁 replace with your real public URL
     });
+=======
+  console.log('🔍 Searching for companies:', q);
+  const url = `${BASE_URL}/mixed_companies/search`;
+  
+  const body = JSON.stringify({
+    q_organization_name: q,
+    partial_results_only: true,
+    partial_results_limit: 10000,
+    has_join: false,
+    disable_eu_prospecting: true,
+    page: 1,
+    per_page: 25, // Increased to show more options
+  });
+>>>>>>> Stashed changes
 
   try {
-    const fetchOptions = method === 'GET'
-      ? { method, headers: HEADERS }
-      : { method, headers: HEADERS, body };
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: HEADERS,
+      body: body
+    });
 
-    console.log('📡 Making request to:', url);
-    console.log('📡 Request body:', body);
-
-    const response = await fetch(url, fetchOptions);
     console.log('📊 Apollo status:', response.status, response.statusText);
 
     const text = await response.text();
@@ -107,62 +117,22 @@ export async function GET(req) {
       return NextResponse.json({ error: data.error || 'Apollo API error' }, { status: response.status });
     }
 
-    if (data.people?.length > 0) {
-      console.log('👤 Sample person:', JSON.stringify(data.people[0], null, 2));
-    } else {
-      console.log('⚠️ No contacts found — try relaxing filters further or verify plan limits.');
-    }
-
+    // Transform the response to ensure consistent structure
     let transformedData = data;
 
-    if (q) {
-      console.log('🔧 Transforming company search response');
-      console.log('📊 Raw companies data keys:', Object.keys(data));
-
-      if (data.mixed_companies) {
-        transformedData = {
-          organizations: data.mixed_companies,
-          mixed_companies: data.mixed_companies
-        };
-      } else if (data.organizations) {
-        transformedData = {
-          organizations: data.organizations,
-          mixed_companies: data.organizations
-        };
-      }
-
-      console.log('✅ Company search found:', transformedData.organizations?.length || 0, 'results');
-    }
-
-    else if (orgId) {
-      console.log('🔧 Transforming contact search response');
-      console.log('📊 Raw contacts data keys:', Object.keys(data));
-
+    if (data.mixed_companies) {
       transformedData = {
-        people: data.people || [],
-        contacts: data.people || []
+        organizations: data.mixed_companies,
+        mixed_companies: data.mixed_companies
       };
-
-      console.log('✅ Contact search found:', transformedData.people?.length || 0, 'results');
+    } else if (data.organizations) {
+      transformedData = {
+        organizations: data.organizations,
+        mixed_companies: data.organizations
+      };
     }
 
-    else if (personId) {
-      console.log('🔧 Transforming person enrichment response');
-      console.log('📊 Raw person data keys:', Object.keys(data));
-
-      if (data.person) {
-        transformedData = data;
-      } else if (data.people && data.people.length > 0) {
-        transformedData = { person: data.people[0] };
-      }
-
-      const phoneNumber = transformedData.person?.phone_numbers?.[0]?.sanitized_number ||
-                         transformedData.person?.phone || null;
-      const email = transformedData.person?.email || transformedData.person?.emails?.[0] || null;
-
-      console.log('✅ Person enrichment phone:', phoneNumber ? '✓' : '✗');
-      console.log('✅ Person enrichment email:', email ? '✓' : '✗');
-    }
+    console.log('✅ Company search found:', transformedData.organizations?.length || 0, 'results');
 
     return NextResponse.json(transformedData);
 
@@ -172,5 +142,9 @@ export async function GET(req) {
       error: `Internal Server Error: ${error.message}`
     }, { status: 500 });
   }
+<<<<<<< Updated upstream
 }
 }
+=======
+}
+>>>>>>> Stashed changes
